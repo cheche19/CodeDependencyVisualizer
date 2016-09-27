@@ -11,6 +11,25 @@ from DotGenerator import *
 
 dotGenerator = DotGenerator()
 
+class UmlClass:
+    def __init__(self):
+        self.fqn = None
+        self.parents = []
+        self.privateFields = []
+        self.privateMethods = []
+        self.publicFields = []
+        self.publicMethods = []
+        self.protectedFields = []
+        self.protectedMethods = []
+        self.namespace = []
+
+    def addParentByFQN(self, fullyQualifiedClassName):
+        self.parents.append(fullyQualifiedClassName)
+
+    def getId(self):
+        return "id" + str(hashlib.md5(self.fqn).hexdigest())
+
+
 
 def findFilesInDir(rootDir, patterns):
     """ Searches for files in rootDir which file names mathes the given pattern. Returns

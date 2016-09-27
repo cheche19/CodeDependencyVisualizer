@@ -2,23 +2,6 @@ import hashlib
 import logging
 
 
-class UmlClass:
-    def __init__(self):
-        self.fqn = None
-        self.parents = []
-        self.privateFields = []
-        self.privateMethods = []
-        self.publicFields = []
-        self.publicMethods = []
-        self.protectedFields = []
-        self.protectedMethods = []
-
-    def addParentByFQN(self, fullyQualifiedClassName):
-        self.parents.append(fullyQualifiedClassName)
-
-    def getId(self):
-        return "id" + str(hashlib.md5(self.fqn).hexdigest())
-
 
 class DotGenerator:
     _showPrivMembers = False
