@@ -110,7 +110,7 @@ class ASTParser(object):
 
 
 
-    def processClass(self, cursor):
+    def processClass(self, cursor, namespace):
         """ Processes an ast node that is a class. """
         umlClass = UmlClass()  # umlClass is the datastructure for the DotGenerator
         # that stores the necessary information about a single class.
@@ -124,6 +124,8 @@ class ASTParser(object):
             #   class MyClass ...
             #   struct MyStruct ...
             umlClass.fqn = cursor.type.spelling  # the fully qualified name
+
+        umlClass.namespace = namespace
 
         import re
         if (self._inclusionConfig['excludeClasses'] and
@@ -141,20 +143,26 @@ class ASTParser(object):
         self._generator.addClass(umlClass)
 
 
-    def traverseAst(self, cursor):
+    def traverseAst(self, cursor, namespace=[]):
+        current_namespace = []
+        for nm in namespace:
+            current_namespace.append(nm)
         import re
         if (self._inclusionConfig['excludeNamespaces']):
-            if ((cursor.kind == clang.cindex.CursorKind.NAMESPACE) and re.match(self._inclusionConfig['excludeNamespaces'], cursor.spelling)):
-                return
+            if ((cursor.kind == clang.cindex.CursorKind.NAMESPACE)):
+                if (re.match(self._inclusionConfig['excludeNamespaces'], cursor.spelling)):
+                    return
+                else:
+                    current_namespace.append(cursor.spelling)
         if (cursor.kind == clang.cindex.CursorKind.CLASS_DECL
             or cursor.kind == clang.cindex.CursorKind.STRUCT_DECL
             or cursor.kind == clang.cindex.CursorKind.CLASS_TEMPLATE):
             # if the current cursor is a class, class template or struct declaration,
             # we process it further ...
-            self.processClass(cursor)
+            self.processClass(cursor, current_namespace)
 
         for child_node in cursor.get_children():
-            self.traverseAst(child_node)
+            self.traverseAst(child_node, current_namespace)
 
 
     def parseTranslationUnit(self, filePath, includeDirs):
