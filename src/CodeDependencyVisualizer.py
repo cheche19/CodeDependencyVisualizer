@@ -115,6 +115,11 @@ def processClass(cursor, inclusionConfig):
 
 
 def traverseAst(cursor, inclusionConfig):
+    import re
+    if (inclusionConfig['excludeNamespaces']):
+        if ((cursor.kind == clang.cindex.CursorKind.NAMESPACE) and re.match(inclusionConfig['excludeNamespaces'], cursor.spelling)):
+            print "Skipping ", cursor.spelling
+            return
     if (cursor.kind == clang.cindex.CursorKind.CLASS_DECL
             or cursor.kind == clang.cindex.CursorKind.STRUCT_DECL
             or cursor.kind == clang.cindex.CursorKind.CLASS_TEMPLATE):
@@ -148,7 +153,8 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbose', action="store_true", help="print verbose information for debugging purposes")
     parser.add_argument('--excludeClasses', help="classes matching this pattern will be excluded")
     parser.add_argument('--includeClasses', help="only classes matching this pattern will be included")
-
+    parser.add_argument('--excludeNamespaces', help="Namespaces matching this pattern will be excluded")
+    
     args = vars(parser.parse_args(sys.argv[1:]))
 
     filesToParsePatterns = ['*.cpp', '*.cxx', '*.c', '*.cc']
@@ -168,7 +174,9 @@ if __name__ == "__main__":
         logging.info("parsing file " + sourceFile)
         parseTranslationUnit(sourceFile, args['includeDirs'], {
             'excludeClasses': args['excludeClasses'],
-            'includeClasses': args['includeClasses']})
+            'includeClasses': args['includeClasses'],
+            'excludeNamespaces': args['excludeNamespaces'],
+        })
 
     dotGenerator.setDrawAssociations(args['associations'])
     dotGenerator.setDrawInheritances(args['inheritances'])
